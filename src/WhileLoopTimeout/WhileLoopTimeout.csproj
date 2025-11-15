@@ -1,0 +1,92 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12.0</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <CopyToMods Condition="'$(CopyToMods)'==''">false</CopyToMods>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableResoniteHotReloadLib Condition="'$(EnableResoniteHotReloadLib)'==''">false</EnableResoniteHotReloadLib>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(EnableResoniteHotReloadLib)'=='true'">
+    <DefineConstants>$(DefineConstants);USE_RESONITE_HOT_RELOAD_LIB</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="ResoniteModLoader">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/Libraries/ResoniteModLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="HarmonyLib">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/rml_libs/0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="FrooxEngine">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/FrooxEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Elements.Core">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/Elements.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Renderite.Shared">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/Renderite.Shared.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ProtoFlux.Core">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/ProtoFlux.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ProtoFlux.Nodes.Core">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/ProtoFlux.Nodes.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ProtoFlux.Nodes.FrooxEngine">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/ProtoFlux.Nodes.FrooxEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ResoniteHotReloadLib" Condition="'$(EnableResoniteHotReloadLib)'=='true'">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/rml_libs/ResoniteHotReloadLib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild" Version="5.12.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(CopyToMods)'=='true'">
+    <PropertyGroup>
+      <_ResoniteModsDir>$(ResolvedResoniteAssembliesDir)/rml_mods</_ResoniteModsDir>
+      <_HotReloadModsDir>$(_ResoniteModsDir)/HotReloadMods</_HotReloadModsDir>
+      <_BuiltAssembly>$(TargetDir)$(TargetFileName)</_BuiltAssembly>
+      <_HotReloadCopyEnabled>false</_HotReloadCopyEnabled>
+      <_HotReloadCopyEnabled Condition="'$(EnableResoniteHotReloadLib)'=='true'">true</_HotReloadCopyEnabled>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(_ResoniteModsDir)" Condition="!Exists('$(_ResoniteModsDir)')" />
+
+    <Message Text="Copying $(TargetFileName) to $(_ResoniteModsDir) (up to 2 retries; failures become warnings while Resonite is running)." Importance="high" />
+    <Copy SourceFiles="$(_BuiltAssembly)"
+          DestinationFiles="$(_ResoniteModsDir)/$(TargetFileName)"
+          SkipUnchangedFiles="true"
+          Retries="2"
+          RetryDelayMilliseconds="250"
+          ContinueOnError="true" />
+
+    <Message Text="Copying $(TargetFileName) to $(_HotReloadModsDir) for ResoniteHotReloadLib." Importance="high" Condition="$(_HotReloadCopyEnabled)" />
+    <MakeDir Directories="$(_HotReloadModsDir)" Condition="$(_HotReloadCopyEnabled)" />
+    <Copy Condition="$(_HotReloadCopyEnabled)"
+          SourceFiles="$(_BuiltAssembly)"
+          DestinationFiles="$(_HotReloadModsDir)/$(TargetFileName)"
+          SkipUnchangedFiles="true"
+          Retries="1"
+          RetryDelayMilliseconds="100" />
+  </Target>
+
+</Project>
