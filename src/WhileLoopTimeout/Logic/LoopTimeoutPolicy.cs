@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace WhileLoopTimeout.Logic;
 
 /// <summary>
@@ -14,6 +16,7 @@ internal static class LoopTimeoutPolicy
     /// <param name="timeoutMs">Timeout threshold in milliseconds.</param>
     /// <param name="abortRequested">Whether an external abort has been requested.</param>
     /// <returns>True when the loop should abort.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool ShouldAbort(long previousTick, long currentTick, long elapsedMs, int timeoutMs, bool abortRequested)
     {
         return abortRequested || (currentTick == previousTick && elapsedMs > timeoutMs);
