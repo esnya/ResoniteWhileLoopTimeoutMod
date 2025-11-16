@@ -82,28 +82,28 @@ jobs:
           ResoniteAssembliesDir: ${{ env.RESONITE_INSTALL_DIR }}
         shell: bash
         run: |
-          dotnet restore FluxLoopTweaks.sln
+          dotnet restore WhileLoopTimeout.sln
 
       - name: Verify formatting
         env:
           ResoniteAssembliesDir: ${{ env.RESONITE_INSTALL_DIR }}
         shell: bash
         run: |
-          dotnet format FluxLoopTweaks.sln --verify-no-changes --no-restore
+          dotnet format WhileLoopTimeout.sln --verify-no-changes --no-restore
 
       - name: Build
         env:
           ResoniteAssembliesDir: ${{ env.RESONITE_INSTALL_DIR }}
         shell: bash
         run: |
-          dotnet build FluxLoopTweaks.sln --configuration Release --no-restore
+          dotnet build WhileLoopTimeout.sln --configuration Release --no-restore
 
       - name: Test
         env:
           ResoniteAssembliesDir: ${{ env.RESONITE_INSTALL_DIR }}
         shell: bash
         run: |
-          dotnet test FluxLoopTweaks.sln --configuration Release --no-build
+          dotnet test WhileLoopTimeout.sln --configuration Release --no-build
 
       - name: Prepare release assets
         if: startsWith(github.ref, 'refs/tags/v')
@@ -112,16 +112,16 @@ jobs:
           set -euo pipefail
           artifacts_dir=release-artifacts
           mkdir -p "$artifacts_dir"
-          cp src/FluxLoopTweaks/bin/Release/net9.0/FluxLoopTweaks.dll "$artifacts_dir/FluxLoopTweaks.dll"
-          if [ -f src/FluxLoopTweaks/bin/Release/net9.0/FluxLoopTweaks.pdb ]; then
-            cp src/FluxLoopTweaks/bin/Release/net9.0/FluxLoopTweaks.pdb "$artifacts_dir/FluxLoopTweaks.pdb"
+          cp src/WhileLoopTimeout/bin/Release/net9.0/WhileLoopTimeout.dll "$artifacts_dir/WhileLoopTimeout.dll"
+          if [ -f src/WhileLoopTimeout/bin/Release/net9.0/WhileLoopTimeout.pdb ]; then
+            cp src/WhileLoopTimeout/bin/Release/net9.0/WhileLoopTimeout.pdb "$artifacts_dir/WhileLoopTimeout.pdb"
           fi
 
       - name: Upload release artifacts
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
-          name: flux-loop-tweaks
+          name: while-loop-timeout
           path: release-artifacts
           if-no-files-found: error
 
@@ -135,15 +135,15 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: flux-loop-tweaks
+          name: while-loop-timeout
           path: release-artifacts
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: Flux Loop Tweaks ${{ github.ref_name }}
+          name: While Loop Timeout ${{ github.ref_name }}
           generate_release_notes: true
           files: |
-            release-artifacts/FluxLoopTweaks.dll
-            release-artifacts/FluxLoopTweaks.pdb
+            release-artifacts/WhileLoopTimeout.dll
+            release-artifacts/WhileLoopTimeout.pdb
