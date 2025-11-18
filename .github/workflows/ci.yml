@@ -146,8 +146,11 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
             echo "tag_name=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
-          else
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
             echo "tag_name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Unexpected event: ${{ github.event_name }} with ref: ${{ github.ref }}"
+            exit 1
           fi
 
       - name: Publish GitHub release
@@ -155,7 +158,9 @@ jobs:
         with:
           tag_name: ${{ steps.tag.outputs.tag_name }}
           name: While Loop Timeout ${{ steps.tag.outputs.tag_name }}
-          generate_release_notes: true
+          # When triggered by release event, this updates the existing release
+          # When triggered by tag push, this creates a new release
+          generate_release_notes: ${{ github.event_name != 'release' }}
           files: |
             release-artifacts/WhileLoopTimeout.dll
             release-artifacts/WhileLoopTimeout.pdb
