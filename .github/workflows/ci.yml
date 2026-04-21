@@ -1,33 +1,46 @@
-name: ci
-
-permissions:
-  contents: write
+name: CI
 
 on:
-  pull_request:
   push:
     branches:
-      - main
       - master
     tags:
-      - "v*"
+      - v*
+  pull_request:
+  release:
+    types: [created, published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
-  RESONITE_INSTALL_DIR: ${{ github.workspace }}/Resonite
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  RESONITE_INSTALL_DIR: ${{ github.workspace }}/.resonite
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 10.0.x
+      - name: Verify Steam credentials
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.STEAMUSER }}" ]; then
+            echo '::error::Missing secrets.STEAMUSER. Add the Steam username used for SteamCMD downloads.'
+            exit 1
+          fi
+          if [ -z "${{ secrets.STEAMPASS }}" ]; then
+            echo '::error::Missing secrets.STEAMPASS. Add the Steam password used for SteamCMD downloads.'
+            exit 1
+          fi
 
       - name: Setup Resonite environment
         uses: resonite-modding-group/setup-resonite-env-action@v0.1.0
@@ -36,45 +49,107 @@ jobs:
           steam-password: ${{ secrets.STEAMPASS }}
           resonite-path: ${{ env.RESONITE_INSTALL_DIR }}
 
-      - name: Prepare fallback references
+      - name: Install ResoniteModLoader binaries
+        env:
+          RESONITE_PATH: ${{ env.RESONITE_INSTALL_DIR }}
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "${RESONITE_INSTALL_DIR}/Libraries" "${RESONITE_INSTALL_DIR}/rml_libs"
-          curl -fsSL -o "${RESONITE_INSTALL_DIR}/Libraries/ResoniteModLoader.dll" \
+          install -d "$RESONITE_PATH/Libraries" "$RESONITE_PATH/rml_libs"
+          curl -sSfL -o "$RESONITE_PATH/Libraries/ResoniteModLoader.dll" \
             https://github.com/resonite-modding-group/ResoniteModLoader/releases/latest/download/ResoniteModLoader.dll
-          curl -fsSL -o "${RESONITE_INSTALL_DIR}/rml_libs/0Harmony.dll" \
+          curl -sSfL -o "$RESONITE_PATH/rml_libs/0Harmony.dll" \
             https://github.com/resonite-modding-group/ResoniteModLoader/releases/latest/download/0Harmony.dll
 
-      - name: Restore
-        run: dotnet restore ./WhileLoopTimeout.sln -p:ResoniteAssembliesDir="${{ env.RESONITE_INSTALL_DIR }}/"
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
 
-      - name: Format
-        run: dotnet format ./WhileLoopTimeout.sln --verify-no-changes --no-restore -p:ResoniteAssembliesDir="${{ env.RESONITE_INSTALL_DIR }}/"
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json', '**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        env:
+          ResoniteAssembliesDir: ${{ env.RESONITE_INSTALL_DIR }}
+        shell: bash
+        run: dotnet restore WhileLoopTimeout.sln
+
+      - name: Verify formatting
+        env:
+          ResoniteAssembliesDir: ${{ env.RESONITE_INSTALL_DIR }}
+        shell: bash
+        run: dotnet format WhileLoopTimeout.sln --verify-no-changes --no-restore
 
       - name: Build
-        run: dotnet build ./WhileLoopTimeout.sln -c Release --no-restore -p:ResoniteAssembliesDir="${{ env.RESONITE_INSTALL_DIR }}/"
+        env:
+          ResoniteAssembliesDir: ${{ env.RESONITE_INSTALL_DIR }}
+        shell: bash
+        run: dotnet build WhileLoopTimeout.sln --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test ./WhileLoopTimeout.sln -c Release --no-build -p:ResoniteAssembliesDir="${{ env.RESONITE_INSTALL_DIR }}/"
+        env:
+          ResoniteAssembliesDir: ${{ env.RESONITE_INSTALL_DIR }}
+        shell: bash
+        run: dotnet test WhileLoopTimeout.sln --configuration Release --no-build
 
-      - name: Pack artifact
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Prepare release assets
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release'
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p artifacts
-          cp ./src/WhileLoopTimeout/bin/Release/net10.0/WhileLoopTimeout.dll ./artifacts/
+          artifacts_dir=release-artifacts
+          mkdir -p "$artifacts_dir"
+          cp src/WhileLoopTimeout/bin/Release/net10.0/WhileLoopTimeout.dll "$artifacts_dir/WhileLoopTimeout.dll"
+          if [ -f src/WhileLoopTimeout/bin/Release/net10.0/WhileLoopTimeout.pdb ]; then
+            cp src/WhileLoopTimeout/bin/Release/net10.0/WhileLoopTimeout.pdb "$artifacts_dir/WhileLoopTimeout.pdb"
+          fi
 
-      - name: Upload artifact
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v7
+      - name: Upload release artifacts
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release'
+        uses: actions/upload-artifact@v4
         with:
-          name: WhileLoopTimeout
-          path: artifacts/WhileLoopTimeout.dll
+          name: while-loop-timeout
+          path: release-artifacts
+          if-no-files-found: error
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" ./artifacts/WhileLoopTimeout.dll --verify-tag --generate-notes
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'release'
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: while-loop-timeout
+          path: release-artifacts
+
+      - name: Determine release tag
+        id: tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "tag_name=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "tag_name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Unexpected event: ${{ github.event_name }} with ref: ${{ github.ref }}"
+            exit 1
+          fi
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag_name }}
+          name: While Loop Timeout ${{ steps.tag.outputs.tag_name }}
+          generate_release_notes: ${{ github.event_name != 'release' }}
+          files: |
+            release-artifacts/WhileLoopTimeout.dll
+            release-artifacts/WhileLoopTimeout.pdb
