@@ -50,6 +50,7 @@ jobs:
         run: dotnet format WhileLoopTimeout.sln --verify-no-changes
 
   build:
+    if: github.event_name != 'pull_request'
     needs: formatting
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -60,7 +61,6 @@ jobs:
           fetch-depth: 0
 
       - name: Verify Steam credentials
-        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           if [ -z "${{ secrets.STEAMUSER }}" ]; then
@@ -73,28 +73,11 @@ jobs:
           fi
 
       - name: Setup Resonite environment
-        if: github.event_name != 'pull_request'
         uses: resonite-modding-group/setup-resonite-env-action@v0.1.0
         with:
           steam-user: ${{ secrets.STEAMUSER }}
           steam-password: ${{ secrets.STEAMPASS }}
           resonite-path: ${{ env.RESONITE_INSTALL_DIR }}
-
-      - name: Setup SteamCMD
-        if: github.event_name == 'pull_request'
-        uses: CyberAndrii/setup-steamcmd@29e114af032a947f5ed57832409070d6e4cbfce3
-
-      - name: Download Resonite with anonymous SteamCMD
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          steamcmd \
-            '+@sSteamCmdForcePlatformType windows' \
-            '+force_install_dir "${RESONITE_INSTALL_DIR}"' \
-            '+login anonymous' \
-            '+app_update 2519830 validate' \
-            '+quit'
 
       - name: Install ResoniteModLoader binaries
         env:
