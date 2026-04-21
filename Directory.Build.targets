@@ -1,6 +1,7 @@
 <Project>
   <Target Name="EnsureResoniteAssembliesDir" BeforeTargets="ResolveReferences">
     <Error Condition="'$(ResoniteAssembliesDir)'==''" Text="ResoniteAssembliesDir must be set (or install Resonite under ./Resonite, the default Steam Windows path, or ~/.steam/steam/steamapps/common/Resonite/ for auto-detection)." />
-    <Error Condition="!Exists('$(ResolvedResoniteAssembliesDir)/FrooxEngine.dll')" Text="Cannot find FrooxEngine.dll under $(ResolvedResoniteAssembliesDir)." />
+    <Error Condition="'$(FrooxEnginePresent)'!='true' and !Exists('$(ResolvedResoniteAssembliesDir)/Libraries/ResoniteModLoader.dll')" Text="Cannot find ResoniteModLoader.dll under $(ResolvedResoniteAssembliesDir)/Libraries." />
+    <Error Condition="'$(FrooxEnginePresent)'!='true' and !Exists('$(ResolvedResoniteAssembliesDir)/rml_libs/0Harmony.dll')" Text="Cannot find 0Harmony.dll under $(ResolvedResoniteAssembliesDir)/rml_libs." />
   </Target>
 </Project>

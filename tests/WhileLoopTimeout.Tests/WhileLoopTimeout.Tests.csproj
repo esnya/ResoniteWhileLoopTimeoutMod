@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>WhileLoopTimeout.Tests</RootNamespace>
     <IsPackable>false</IsPackable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <NoWarn>$(NoWarn);CA1515;CA1707</NoWarn>
   </PropertyGroup>
 
@@ -24,7 +25,7 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(FrooxEnginePresent)'=='true'">
     <Reference Include="FrooxEngine">
       <HintPath>$(ResoniteAssembliesDir)/FrooxEngine.dll</HintPath>
       <Private>true</Private>
@@ -51,6 +52,18 @@
     </Reference>
     <Reference Include="ProtoFlux.Nodes.FrooxEngine">
       <HintPath>$(ResoniteAssembliesDir)/ProtoFlux.Nodes.FrooxEngine.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="HarmonyLib">
+      <HintPath>$(ResoniteAssembliesDir)/rml_libs/0Harmony.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(FrooxEnginePresent)'!='true'">
+    <PackageReference Include="Resonite.GameLibs" Version="2026.4.16.1327" />
+    <Reference Include="ResoniteModLoader">
+      <HintPath>$(ResoniteAssembliesDir)/Libraries/ResoniteModLoader.dll</HintPath>
       <Private>true</Private>
     </Reference>
     <Reference Include="HarmonyLib">

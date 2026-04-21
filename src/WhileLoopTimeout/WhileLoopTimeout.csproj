@@ -17,7 +17,7 @@
     <DefineConstants>$(DefineConstants);USE_RESONITE_HOT_RELOAD_LIB</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(FrooxEnginePresent)'=='true'">
     <Reference Include="ResoniteModLoader">
       <HintPath>$(ResolvedResoniteAssembliesDir)/Libraries/ResoniteModLoader.dll</HintPath>
       <Private>false</Private>
@@ -52,6 +52,18 @@
     </Reference>
     <Reference Include="ResoniteHotReloadLib" Condition="'$(EnableResoniteHotReloadLib)'=='true'">
       <HintPath>$(ResolvedResoniteAssembliesDir)/rml_libs/ResoniteHotReloadLib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(FrooxEnginePresent)'!='true'">
+    <PackageReference Include="Resonite.GameLibs" Version="2026.4.16.1327" />
+    <Reference Include="ResoniteModLoader">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/Libraries/ResoniteModLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="HarmonyLib">
+      <HintPath>$(ResolvedResoniteAssembliesDir)/rml_libs/0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

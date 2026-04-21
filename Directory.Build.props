@@ -16,4 +16,9 @@
   <PropertyGroup Condition="'$(ResoniteAssembliesDir)'!=''">
     <ResolvedResoniteAssembliesDir>$([System.IO.Path]::GetFullPath('$(ResoniteAssembliesDir)'))</ResolvedResoniteAssembliesDir>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <FrooxEnginePresent Condition="Exists('$(ResolvedResoniteAssembliesDir)/FrooxEngine.dll')">true</FrooxEnginePresent>
+    <FrooxEnginePresent Condition="'$(FrooxEnginePresent)'==''">false</FrooxEnginePresent>
+  </PropertyGroup>
 </Project>
