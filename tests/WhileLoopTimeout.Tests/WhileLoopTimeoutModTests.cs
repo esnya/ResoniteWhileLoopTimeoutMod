@@ -33,7 +33,7 @@ public static class WhileLoopTimeoutModTests
     {
         WhileLoopTimeout.WhileLoopTimeoutMod mod = new();
 
-        mod.Version.Should().Be("0.1.2");
+        mod.Version.Should().Be("0.1.3");
     }
 
     [Theory]

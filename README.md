@@ -9,7 +9,7 @@
 3. (Optional) Tweak the **Timeout** config entry if you need a shorter or longer guard window.
 4. Launch Resonite and confirm the mod loads via the in-game logs if desired.
 
-Version 0.1.2 is built against Resonite `2026.8.27.1094`.
+Version 0.1.3 is built against Resonite `2026.8.27.1094`.
 
 ## Build & Hot Reload
 
