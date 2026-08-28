@@ -11,7 +11,7 @@ namespace WhileLoopTimeout;
 
 public sealed class WhileLoopTimeoutMod : ResoniteMod
 {
-    public const string VersionTag = "0.1.0";
+    public const string VersionTag = "0.1.2";
     private const string HarmonyIdentifier = "com.nekometer.esnya.while-loop-timeout";
     private const int DefaultTimeoutMs = 30_000;
     private static readonly Harmony HarmonyInstance = new(HarmonyIdentifier);
@@ -27,7 +27,7 @@ public sealed class WhileLoopTimeoutMod : ResoniteMod
     public override string Name => "WhileLoopTimeout";
     public override string Author => "esnya";
     public override string Version => VersionTag;
-    public override string Link => "https://github.com/esnya/WhileLoopTimeout";
+    public override string Link => "https://github.com/esnya/ResoniteWhileLoopTimeoutMod";
 
     internal static int TimeoutMs => configuration?.GetValue(TimeoutKey) ?? DefaultTimeoutMs;
 

@@ -56,8 +56,13 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Resonite.GameLibs" Version="2026.8.27.1094">
+      <ExcludeAssets Condition="'$(FrooxEnginePresent)'=='true'">compile;runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
   <ItemGroup Condition="'$(FrooxEnginePresent)'!='true'">
-    <PackageReference Include="Resonite.GameLibs" Version="2026.4.16.1327" />
     <Reference Include="ResoniteModLoader">
       <HintPath>$(ResolvedResoniteAssembliesDir)/Libraries/ResoniteModLoader.dll</HintPath>
       <Private>false</Private>

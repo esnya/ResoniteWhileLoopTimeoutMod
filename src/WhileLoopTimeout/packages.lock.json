@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "GitVersion.MsBuild": {
+        "type": "Direct",
+        "requested": "[5.12.0, )",
+        "resolved": "5.12.0",
+        "contentHash": "dJuigXycpJNOiLT9or7mkHSkGFHgGW3/p6cNNYEKZBa7Hhp1FdX/cvqYWWYhRLpfoZOedeA7aRbYiOB3vW/dvA=="
+      },
+      "Resonite.GameLibs": {
+        "type": "Direct",
+        "requested": "[2026.8.27.1094, )",
+        "resolved": "2026.8.27.1094",
+        "contentHash": "ArwqFi/iLI7TsBBytfTRnYcAq7H0RFAwnCnEbJFmh33kVE14p8XGD8MwW3V7yFl2C9+Mu/5L9b7mYBUxtmRR3A=="
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@
     <AnalysisLevel>latest-all</AnalysisLevel>
     <Nullable>enable</Nullable>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(ResoniteAssembliesDir)'==''">
