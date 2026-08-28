@@ -101,7 +101,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          version=$(sed -n 's/.*VersionTag = "\([^"]*\)".*/\1/p' src/WhileLoopTimeout/WhileLoopTimeoutMod.cs)
+          version=$(sed -n 's:.*<Version>\([^<]*\)</Version>.*:\1:p' Directory.Build.props)
           test "v${version}" = "${{ github.ref_name }}"
 
       - name: Cache NuGet packages

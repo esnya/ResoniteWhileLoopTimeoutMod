@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 using HarmonyLib;
 
@@ -11,9 +12,9 @@ namespace WhileLoopTimeout;
 
 public sealed class WhileLoopTimeoutMod : ResoniteMod
 {
-    public const string VersionTag = "0.1.2";
     private const string HarmonyIdentifier = "com.nekometer.esnya.while-loop-timeout";
     private const int DefaultTimeoutMs = 30_000;
+    private static readonly Assembly ModAssembly = typeof(WhileLoopTimeoutMod).Assembly;
     private static readonly Harmony HarmonyInstance = new(HarmonyIdentifier);
 
     [AutoRegisterConfigKey]
@@ -26,7 +27,7 @@ public sealed class WhileLoopTimeoutMod : ResoniteMod
 
     public override string Name => "WhileLoopTimeout";
     public override string Author => "esnya";
-    public override string Version => VersionTag;
+    public override string Version => ModAssembly.GetName().Version?.ToString(3) ?? "0.0.0";
     public override string Link => "https://github.com/esnya/ResoniteWhileLoopTimeoutMod";
 
     internal static int TimeoutMs => configuration?.GetValue(TimeoutKey) ?? DefaultTimeoutMs;
