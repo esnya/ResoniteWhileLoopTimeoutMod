@@ -4,6 +4,8 @@
     <AnalysisLevel>latest-all</AnalysisLevel>
     <Nullable>enable</Nullable>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <Version>0.1.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(ResoniteAssembliesDir)'==''">
@@ -15,5 +17,10 @@
 
   <PropertyGroup Condition="'$(ResoniteAssembliesDir)'!=''">
     <ResolvedResoniteAssembliesDir>$([System.IO.Path]::GetFullPath('$(ResoniteAssembliesDir)'))</ResolvedResoniteAssembliesDir>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <FrooxEnginePresent Condition="Exists('$(ResolvedResoniteAssembliesDir)/FrooxEngine.dll')">true</FrooxEnginePresent>
+    <FrooxEnginePresent Condition="'$(FrooxEnginePresent)'==''">false</FrooxEnginePresent>
   </PropertyGroup>
 </Project>

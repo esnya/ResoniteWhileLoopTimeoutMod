@@ -29,12 +29,11 @@ public static class WhileLoopTimeoutModTests
     }
 
     [Fact]
-    public static void Mod_Should_Expose_Static_Version_Tag()
+    public static void Mod_Should_Expose_Release_Version()
     {
         WhileLoopTimeout.WhileLoopTimeoutMod mod = new();
 
-        mod.Version.Should().Be(WhileLoopTimeoutMod.VersionTag);
-        mod.Version.Should().MatchRegex(@"^\d+\.\d+\.\d+");
+        mod.Version.Should().Be("0.1.2");
     }
 
     [Theory]
